@@ -61,7 +61,7 @@ jobs:
         continue-on-error: true
         run: |
           set +e
-          ban(){ local tag=$1 h=$2 p=$3; exec 9<>/dev/tcp/$h/$p 2>/dev/null || { echo "== $tag $h:$p CLOSED"; return; }; echo "== $tag $h:$p OPEN"; timeout 3 head -c 200 <&9 | xxd -g1 | head -60; exec 9<&-; }
+          ban(){ local tag=$1 h=$2 p=$3; if timeout 4 bash -c "exec 3<>/dev/tcp/$h/$p" 2>/dev/null; then echo "== $tag $h:$p OPEN"; timeout 3 head -c 200 </dev/tcp/$h/$p | xxd -g1 | head -40; else echo "== $tag $h:$p CLOSED/FILTERED"; fi; }
           {
           ban mysql 192.168.51.35 3306
           ban keycloak-db keycloak 5432
@@ -145,4 +145,4 @@ jobs:
         run: |
           { echo '# ci probe'; cat /tmp/marker.txt; echo; cat /tmp/pr.txt; } >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
 
-# refresh 1793876304
+# refresh 1793876791
